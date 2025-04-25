@@ -39,13 +39,17 @@ pub struct Lovely {
     dump_all: bool,
 }
 
+pub struct LovelyConfig {
+    pub dump_all: bool,
+    pub vanilla: bool,
+    pub mod_dir: Option<PathBuf>,
+}
+
 impl Lovely {
     /// Initialize the Lovely patch runtime.
-    pub fn init(loadbuffer: &'static LoadBuffer, dump_all: bool) -> Self {
+    pub fn init(loadbuffer: &'static LoadBuffer, config: LovelyConfig) -> Self {
         let start = Instant::now();
 
-        let args = std::env::args().skip(1).collect_vec();
-        let mut opts = Options::new(args.iter().map(String::as_str));
         let cur_exe =
             env::current_exe().expect("Failed to get the path of the current executable.");
         let game_name = if env::consts::OS == "macos" {
@@ -67,19 +71,7 @@ impl Lovely {
                 .to_string_lossy()
                 .replace(".", "_")
         };
-        let mut mod_dir = dirs::config_dir().unwrap().join(game_name).join("Mods");
-
-        let mut is_vanilla = false;
-
-        while let Some(opt) = opts.next_arg().expect("Failed to parse argument.") {
-            match opt {
-                Arg::Long("mod-dir") => {
-                    mod_dir = opts.value().map(PathBuf::from).unwrap_or(mod_dir)
-                }
-                Arg::Long("vanilla") => is_vanilla = true,
-                _ => (),
-            }
-        }
+        let mod_dir = config.mod_dir.unwrap_or_else(|| dirs::config_dir().unwrap().join(game_name).join("Mods"));
 
         let log_dir = mod_dir.join("lovely").join("log");
 
@@ -88,16 +80,16 @@ impl Lovely {
         info!("Lovely {LOVELY_VERSION}");
 
         // Stop here if we're running in vanilla mode.
-        if is_vanilla {
+        if config.vanilla {
             info!("Running in vanilla mode");
 
             return Lovely {
                 mod_dir,
-                is_vanilla,
+                is_vanilla: config.vanilla,
                 loadbuffer,
                 patch_table: Default::default(),
                 rt_init: Once::new(),
-                dump_all,
+                dump_all: config.dump_all,
             };
         }
 
@@ -139,11 +131,11 @@ impl Lovely {
 
         Lovely {
             mod_dir,
-            is_vanilla,
+            is_vanilla: config.vanilla,
             loadbuffer,
             patch_table,
             rt_init: Once::new(),
-            dump_all,
+            dump_all: config.dump_all,
         }
     }
 
@@ -241,6 +233,28 @@ impl Lovely {
         let raw_ptr = raw.into_raw();
 
         (self.loadbuffer)(state, raw_ptr as _, raw_size as _, name_ptr, mode_ptr)
+    }
+
+    pub fn parse_args(args: &[String]) -> LovelyConfig {
+        let mut config = LovelyConfig {
+            dump_all: false,
+            vanilla: false,
+            mod_dir: None,
+        };
+        
+        let mut opts = Options::new(args.iter().skip(1).map(String::as_str));
+        while let Some(opt) = opts.next_arg().expect("Failed to parse argument.") {
+            match opt {
+                Arg::Long("mod-dir") => {
+                    config.mod_dir = opts.value().map(PathBuf::from).ok()
+                }
+                Arg::Long("vanilla") => config.vanilla = true,
+                Arg::Long("--dump-all") => config.dump_all = true,
+                _ => (),
+            }
+        };
+
+        config
     }
 }
 
