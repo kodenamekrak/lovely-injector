@@ -32,6 +32,10 @@ pub static lua_call: LazyLock<Symbol<unsafe extern "C" fn(*mut LuaState, isize, 
 pub static LUA_LIB: LazyLock<Library> =
     LazyLock::new(|| unsafe { Library::new("libluajit-5.1.so.2").unwrap() });
 
+#[cfg(target_os = "android")]
+pub static LUA_LIB: LazyLock<Library> =
+    LazyLock::new(|| unsafe { Library::new("liblove.so").unwrap() });
+
 pub static lua_pcall: LazyLock<
     Symbol<unsafe extern "C" fn(*mut LuaState, isize, isize, isize) -> isize>,
 > = LazyLock::new(|| unsafe { LUA_LIB.get(b"lua_pcall").unwrap() });
