@@ -3,7 +3,7 @@
 Lovely is a lua injector which embeds code into a [LÖVE 2d](https://love2d.org/) game at runtime. Unlike executable patchers, mods can be installed, updated, and removed *over and over again* without requiring a partial or total game reinstallation. This is accomplished through in-process lua API detouring and an easy to use (and distribute) patch system.
 ## Installation
 
-1. Use my fork of [balatro-mobile-maker](https://github.com/kodenamekrak/balatro-mobile-maker) to add the library (Requires manual build)
+1. Use my fork of [balatro-mobile-maker](https://github.com/kodenamekrak/balatro-mobile-maker) to add the library
 2. Install the outputted `balatro.apk`
 3. Run the game once to create the necessary folders
 4. Download mods and extract them in `Android/data/com.unofficial.balatro/files/mods` (Can be done on device using a file explorer)
