@@ -307,7 +307,7 @@ impl PatchTable {
                 }
                 !ignore_file.is_file()
             })
-            .sorted_by(|a, b| filename_cmp(a, b));
+            .sorted_by(filename_cmp);
 
         let patch_files = mod_dirs
             .flat_map(|dir| {
@@ -327,8 +327,8 @@ impl PatchTable {
                         .filter_map(|x| x.ok())
                         .map(|x| x.path())
                         .filter(|x| x.is_file())
-                        .filter(|x| x.extension().unwrap() == "toml")
-                        .sorted_by(|a, b| filename_cmp(a, b))
+                        .filter(|x| x.extension().is_some_and(|x| x == "toml"))
+                        .sorted_by(filename_cmp)
                         .collect_vec();
                     toml_files.append(&mut subfiles);
                 }
