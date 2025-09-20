@@ -11,6 +11,7 @@ use std::{
 };
 
 use lovely_core::Lovely;
+use lovely_core::config::LovelyConfig;
 
 static RUNTIME: OnceLock<Lovely> = OnceLock::new();
 
@@ -69,7 +70,7 @@ unsafe fn construct() {
         return;
     }
 
-    let config = Lovely::parse_args(&args);
+    let config = LovelyConfig::parse_args(&args);
 
     let rt = Lovely::init(&|a, b, c, d, e| RECALL(a, b, c, d, e), lualib::get_lualib(), config);
     RUNTIME

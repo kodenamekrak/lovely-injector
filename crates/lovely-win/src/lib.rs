@@ -9,6 +9,7 @@ use itertools::Itertools;
 use lovely_core::log::*;
 use lovely_core::sys::LuaState;
 use lovely_core::Lovely;
+use config::LovelyConfig;
 use lovely_core::LOVELY_VERSION;
 
 use retour::static_detour;
@@ -74,7 +75,7 @@ unsafe extern "system" fn DllMain(_: HINSTANCE, reason: u32, _: *const c_void) -
         SetConsoleTitleW(PCWSTR(WIN_TITLE.as_ptr())).expect("Failed to set console title.");
     }
 
-    let config = Lovely::parse_args(&args);
+    let config = LovelyConfig::parse_args(&args);
 
     // Initialize the lovely runtime.
     let rt = Lovely::init(
